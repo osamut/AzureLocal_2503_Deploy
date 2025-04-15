@@ -1,17 +1,17 @@
-# Azure Stack HCI 23H2 クラスター展開後に必要な作業をまとめました
-- __Azure Stack HCI 23H2 は Azure ポータルや Azure API から仮想マシンの作成が可能になりました__
+# Azure Local 23H2 クラスター展開後に必要な作業をまとめました
+- __Azure Local 23H2 は Azure ポータルや Azure API から仮想マシンの作成が可能になりました__
 - __ただし、Azure ポータルや API から仮想マシンを作成するためには、オンプレミス側の状況を Azure 側にも情報として持っておく必要があります__
 - __以下の設定は、そのためのものです__
 
-### Azure Stack HCI のネットワークを Azure 側で認識するための仮想ネットワークの定義
+### Azure Local のネットワークを Azure 側で認識するための仮想ネットワークの定義
 - (必要に応じて) Azure ポータルを日本語に変更
-- Azure ポータルの [Azure Arc] - [Azure Stack HCI] 管理画面にて、[すべてのクラスター (プレビュー)] を選択
-- 管理したいクラスター名をクリックすることで Azure Stack HCI クラスターの管理画面に遷移
+- Azure ポータルの [Azure Arc] - [Azure Local] 管理画面にて、[すべてのクラスター (プレビュー)] を選択
+- 管理したいクラスター名をクリックすることで Azure Local クラスターの管理画面に遷移
 - 左ペインの [論理ネットワーク] をクリックし、[+ 論理ネットワークの作成] をクリック
 - [サブスクリプション] と [リソースグループ] を選択
 - 任意の [論理ネットワーク名] を入力
 - [仮想スイッチ名] を入力
-	- Azure Stack HCI 構築時に Hyper-V に仮想スイッチが自動作成されているため、それを探して入力
+	- Azure Local 構築時に Hyper-V に仮想スイッチが自動作成されているため、それを探して入力
  	- ネットワークの構成次第だが、本環境では ConvergedSwitch(compute_management) となっている
 - [次へ: ネットワーク構成] をクリック
 　- 仮想マシンの仮想 NIC に自動設定するためのネットワーク情報を入力
@@ -29,11 +29,11 @@
 
 - 
 -  PREVIEW ではない画面にしたい場合は、画面内の [Old Experience] をクリックすると GA 済みの画面が表示される
-#### 1. [+Create] メニューから [Azure Stack HCI Cluster] を選択
+#### 1. [+Create] メニューから [Azure Local Cluster] を選択
 - 
 - 
 - サブスクリプションに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
-	- Azure Stack HCI Administrator
+	- Azure Local Administrator
  	- Cloud Application Administrator
   	- Reader
 

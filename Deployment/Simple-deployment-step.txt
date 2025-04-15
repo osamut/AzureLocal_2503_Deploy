@@ -39,7 +39,7 @@ Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
 ### プラグランドプレイのEthernetを無効化
 pnputil /remove-device "USB\VID_413C&PID_A102\5678"
 
-## 4. Azure Stack HCI 展開用の Active Directry 事前設定
+## 4. Azure Local 展開用の Active Directry 事前設定
 
 ## 5. Azureポータルでの事前作業
 - Azure ポータルを英語に変更
@@ -51,10 +51,10 @@ Key Vault Secrets Officer
 Key Vault Contributor
 Storage Account Contributor
 - サブスクリプションに対する管理権限を付与
-Azure Stack HCI Administrator
+Azure Local Administrator
 Reader
 
-## 6. Azure Stack HCI 各ノードを Azure Arc で Azure と接続
+## 6. Azure Local 各ノードを Azure Arc で Azure と接続
 Register-PSRepository -Default -InstallationPolicy Trusted
 Install-Module Az.Accounts -RequiredVersion 2.13.2
 Install-Module Az.ConnectedMachine -RequiredVersion 0.5.2
@@ -71,5 +71,5 @@ Invoke-AzStackHciArcInitialization -SubscriptionID $Subscription -ResourceGroup 
 
 ### Azure ポータルの Azure Arc マシン管理画面にて [Extensions] をクリックし、以下の 4 つの拡張機能の追加が成功するのを待つ
 
-## 7. Azure Stack HCI クラスター展開
+## 7. Azure Local クラスター展開
    - 現時点では、何度か再起動が行われるため Remote NDIS Device を削除するなどの作業が都度必要になる
