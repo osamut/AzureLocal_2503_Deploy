@@ -1,4 +1,4 @@
-# AzureStackHCI_23H2 展開方法
+# Azure Local 2503 展開方法
 
 ## 0. 本手順が想定しているネットワーク構成図
 <details>
@@ -6,10 +6,10 @@
 ![image](https://github.com/osamut/AzureStackHCI_23H2/assets/1791583/8c009dd9-d86e-4931-bcb7-a60e1534df88)
 </details>
 
-## 1. Azure Stack HCI の要件を満たすサーバーや NIC、スイッチなどのハードウェアの準備
+## 1. Azure Local の要件を満たすサーバーや NIC、スイッチなどのハードウェアの準備
 <details>
 
-- 要件を確実に満たすため、専門家に相談しつつ、Azure Stack HCI カタログからハードウェアを選択する
+- 要件を確実に満たすため、専門家に相談しつつ、Azure Local カタログからハードウェアを選択する
   -  https://azurestackhcisolutions.azure.microsoft.com/#/catalog
 - サーバーのスペックはサイジングツールで概要を把握し、ベンダーと細かな要件を詰めながら調整する
   -　 https://azurestackhcisolutions.azure.microsoft.com/#/sizer 
