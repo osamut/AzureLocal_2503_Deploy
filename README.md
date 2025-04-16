@@ -77,7 +77,7 @@ Loopback Pseudo-Interface 1　  127.0.0.1　　　　　 WellKnown     ・・・
 ```
 		
 - Azure Local の Network ATC (インテントベースのネットワーク管理)で利用するため、環境に合わせて NIC 名を変更
-	- 今回の環境で使う NIC 名が Port1,Port2,Port3,Port4 になっていることが前提で書いてある
+	- 本記事では NIC 名が Port1,Port2,Port3,Port4 になっていることが前提で書いてある
  	- 既存環境の NIC 名を使って正しく設定する必要あり
 - 最初に手動で IP アドレス設定をした管理用 NIC の名前を MGMT_VM1 に変更
 ```
@@ -96,6 +96,11 @@ Get-NetAdapter -Name "MGMT_VM2" | Set-NetIPInterface -Dhcp Disabled
 Get-NetAdapter -Name "Storage1" | Set-NetIPInterface -Dhcp Disabled
 Get-NetAdapter -Name "Storage2" | Set-NetIPInterface -Dhcp Disabled
 ```
+- IPv6 の無効化
+```
+Disable-NetAdapterBinding -Name * -ComponentID ms_tcpip6
+```
+
 - NIC ドライバーをインストール
 	- サーバーベンダーのサイトからダウンロードした最新のサポートされた NIC ドライバーをインストール
 	- 管理用マシンなどでダウンロードしたドライバーを含むフォルダーを共有しておき、Azure Local ノードから「net use v: \\コンピュータ名\共有名」などで接続、ドライバーのインストールを行う
@@ -109,28 +114,25 @@ Get-NetAdapter -Name * | Select *Driver*
 __※ Ethernet = Ethernet Remote NDIS Compatible Device という Inbox Driver NIC が存在する可能性あり　・・・対処が必要__
 - [Enternet Remote NDIS Compatible Device という NIC について](https://www.dell.com/support/kbdoc/ja-jp/000130077/poweredge-idrac-%E3%83%80%E3%82%A4%E3%83%AC%E3%82%AF%E3%83%88-%E6%A9%9F%E8%83%BD-%E3%81%AE-%E4%BD%BF%E7%94%A8-%E6%96%B9%E6%B3%95)
 
-- 対処方法１：以下のコマンドにて該当するクラスター検証時のエラーを回避
+- 対処１：以下のコマンドにて該当するクラスター検証時のエラーを回避
 ```
 # Exclude iRDAC USB NIC from cluster validation
 New-Item -Path HKLM:\system\currentcontrolset\services\clussvc
 New-Item -Path HKLM:\system\currentcontrolset\services\clussvc\parameters
 New-ItemProperty -Path HKLM:\system\currentcontrolset\services\clussvc\parameters -Name ExcludeAdaptersByDescription  -Value "Remote NDIS Compatible Device"
 ```
-- 対処方法２：以下のコマンドにて該当するプラグ＆プレイデバイスを削除
+- 対処２：以下のコマンドにて該当するプラグ＆プレイデバイスを削除
 	- pnputil /enum-devices /ids /class net コマンドにて Network Device の Instance ID を確認可能
 	- プラグ＆プレイデバイスのためノード再起動後に Enternet Remote NDIS Compatible Device は自動復活する
 ```
 pnputil /remove-device "USB\VID_413C&PID_A102\5678"
 ```
 
-- IPv6 の無効化
-```
-Disable-NetAdapterBinding -Name * -ComponentID ms_tcpip6
-```
 - VLAN 構成と NIC の関係を確認しておく
 	- Software Defined Storage 用の RDMA NIC には VLAN 設定が必須
-	- Azure Local 展開時にVLAN 強制適用で、VLAN 0 も不可
+	- Azure Local 展開時に VLAN を強制適用するため、VLAN 0 は不可
 	- よって、ストレージ用 NIC がスイッチ経由でつながっている場合はスイッチ側の VLAN 設定も行い、どの NIC と結線されているかを理解しておく
+	- 今回の環境は Storage1 は VLAN 147、Storage2 は VLAN 148 に接続されている
 	- クラスター作成後の NIC の VLAN 設定確認は Get-NetAdapter -Name * | fl にて可能
 
 </details>
@@ -139,6 +141,8 @@ Disable-NetAdapterBinding -Name * -ComponentID ms_tcpip6
 <details>
 	
 **※ Active Directry に管理者としてアクセスできるマシンであればどこからでも実施可能**
+https://learn.microsoft.com/ja-jp/azure/azure-local/deploy/deployment-prep-active-directory?view=azloc-2503
+
 - Active Directory に作成する OU 名と新規追加する展開用のユーザー名、パスワードを決める
 	- 既存 OU 名の指定、既存ユーザー名の入力も可能だが、以下のように Azure Local に最適化されることになる
 	- OU にはホストやクラスターオブジェクトが追加され、サーバーボリュームが暗号化されている場合、OU を削除すると BitLocker 回復キーも削除されるため、専用の OU が望ましい
@@ -185,25 +189,25 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 ## 6. Azure Local 各ノードを Azure Arc で Azure と接続
 <details>
 	
-### 各 Azure Local ノードを Azure Arc に登録するための手順３　実際の登録作業
+### 各 Azure Local ノードを Azure Arc に登録するための手順
 
 #### 1. Azure Local ノードと直接接続可能なマシンに接続
-#### 2. ドメインの管理者でログオン
+#### 2. ノードの管理権限を持つ管理者ユーザーでログオン
 #### 3. Configurator application をダウンロードし、起動
 - https://aka.ms/ConfiguratorAppForHCI
-#### 4. Configurator application にて１つのノードの Azure Arc 接続作業
+#### 4. Configurator application にて１つ目のノードの Azure Arc 接続作業
 - 4-4-1: マシン名： ノード１の IP アドレスを入力
 - 4-4-2: サインイン： administrator
 - 4-4-3: パスワードの入力： Azure Local OS インストール後に設定したパスワードを入力
 - 4-4-4: Azure Arc エージェントのセットアップ：
 	- [開始]-[次へ]
-	- 鉛筆マークをクリックし、[NIC1]を選択して[次へ]
+	- 鉛筆マークをクリックし、[MGMT_VM1]を選択して[次へ]
 	- 利用するAzure の[サブスクリプションID][リソースグループ][リージョン][テナントID]を入力し[次へ]
 	- [完了] 
-	- 画面の表示が切り替わり、6つのステップを表示。しばらくすると 6 番目の ARC 構成で認証が促される
+	- 画面の表示が切り替わり、6つのステップを表示。しばらくすると 6 番目の Arc 構成で認証が促される
 	- デバイスコードをコピーし、https://microsoft.com/devicelogin にアクセスしてコードを貼り付け、
 	　 Azure Local 展開の権限を持つ Entra ID ユーザーで認証を完了
-- 4-4-5: ARC 構成が成功したのち、Azure Portal にて Azure Local マシンが Azure Arc マシンとして登録されているかを確認
+- 4-4-5: Arc 構成が成功したのち、Azure Portal にて Azure Local マシンが Azure Arc マシンとして登録されているかを確認
 #### 5. Configurator application にて2つ目、3つ目のノードの Azure Arc 接続作業
 - 4-4-1～4-4-5 と同じ操作を全てのノードに対して実施
 
@@ -213,7 +217,6 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 <details>
 	
 ### 事前設定
-- Azure ポータルが英語であることを確認  ・・・不要なトラブルを回避するため
 - サブスクリプションに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
 	- Azure Stack HCI Administrator
   	- Reader
@@ -231,7 +234,7 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 	- リソースグループが違うと画面一番下に Arc に登録したサーバー一覧が表示されないので注意
 - 2-2: [インスタンス名] には作成するクラスターの名前を入力
 - 2-3: [リージョン]はサポートしているリージョンを入力　※ Japan East で OK
-- 2-4: [＋マシンの追加] をクリックし、Azure Arcに接続した Azure Local マシン2台を追加
+- 2-4: [＋マシンの追加] をクリックし、Azure Arc に接続した Azure Local マシン2台を追加
 	- 「Arc 拡張機能がありません」と表示されているので、[拡張機能のインストール] をクリック　※ 15分ほどかかる
 	-  Azure Portal の Azure Arc 管理画面にて、マシンの一覧にある Azure Local ノードを選択
 	- [設定]の下の[拡張機能]をクリックし、4つの拡張モジュールの作成が完了するのを待つ (MDE.Windows は除く)
@@ -245,7 +248,7 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
  	- テンプレートが用意できている場合はテンプレートを利用可能
 #### 4.  ネットワークタブ
 - ※ ここは実際の環境に合わせて設定をする必要がある
-- ※ 以下は NIC4 枚の環境にて、管理＆VM 用ネットワークに MGMT_VM1 と MGMT_VM2 を、ストレージ用に NIC3 と NIC4 を利用する想定
+- ※ 以下は NIC4 枚の環境にて、管理＆VM 用ネットワークに MGMT_VM1 と MGMT_VM2 を、ストレージ用に Storage1 と Storage2 を利用する想定
 - 4-1: [ストレージのネットワークスイッチ] を選択
 - 4-2: [管理とコンピューティングのトラフィックをグループ化する] を選択
 - 4-3: インテント名「コンピューティング_管理」に対して [MGMT_VM1] を選択
@@ -260,7 +263,7 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 - 4-9: [環境に合わせた VLAN ID] を入力
 - 4-10: [ネットワーク設定のカスタマイズ] をクリックして「RDMA プロトコル」を環境に合わせる　(RoCEv2/iWarp など)
 - 4-11: ノードとインスタンスの IP 割り当てが [手動] になっていることを確認　- DHCP 環境があれば自動でもよい
-- 4-12: Azure Local が利用する最低 6 つの IP アドレス範囲を用意し、[開始 IP] ~ [終了 IP] として入力
+- 4-12: Azure Local が利用する最低 6 つの IP アドレス範囲を用意し、[開始 IP] ~ [終了 IP] 枠に入力
 - 4-13: [サブネットマスク　例 255.255.255.0] を入力
 - 4-14: [デフォルトゲートウェイの IP アドレス] を入力
 - 4-15: [DNS サーバーの IP アドレス] を入力
@@ -273,19 +276,20 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 - 5-2: Azure ストレージアカウント名では、Cloud witness 用に [新規作成]をクリック、さらに右に出てきた内容を確認
 	- [作成] をクリックし、Azure ストレージアカウントを作成
 - 5-3: ドメイン [例 contoso.com] を入力
-- 5-4: OU  [例 OU=test,DC=contoso,DC=com] を入力　　　※Active Directory の準備の際に設定した OU
+- 5-4: OU  [例 OU=test,DC=contoso,DC=com] を入力　　　※4 の Active Directory の準備の際に設定した OU
 - 5-5: デプロイアカウントユーザー名を入力　　※ Active Directory の準備の際に指定した Deployment 用のユーザー名
 - 5-6: デプロイアカウントユーザーのパスワードを間違えないように入力　※ Deployment 用ユーザーのパスワード
-- 5-7: Azure Local マシンのローカル管理者のユーザー名 [administrator] を入力　　※特別な設定をしていなければ Administrator で OK
+- 5-7: Azure Local マシンのローカル管理者のユーザー名 [administrator] を入力　　※特別な設定をしていなければ administrator で OK
 - 5-8: Azure Local マシンのローカル管理者パスワードを間違えないように入力　　※ Azure Local OS インストール後に設定したパスワードを入力
 - 5-9: [次へ: セキュリティ] をクリック
 #### 6. セキュリティタブ
 - [推奨セキュリティ設定] が選択されていることを確認し [次へ: 詳細設定] をクリック
-	- Nested でもデフォルトのまま展開できることを確認済み
  	- 推奨設定の機能を変更したい場合は [カスタマイズされたセキュリティ設定] をクリックして有効にしたい項目のみを選択
 #### 7. 詳細設定タブ
 - [ワークロード ボリュームと必要なインフラストラクチャ ボリュームを作成する] が選択されていることを確認し[次へ: タグ] をクリック
-	- 既定で、Software Defined Storage プールに Infrastructure ボリュームと、Azure Local 各ノードを Owner とする論理ボリュームを自動作成してくれる
+	- 既定では、Software Defined Storage プールに ClusterPerformanceHistory/Infrastructure_1 ボリュームと、Azure Local 各ノードを Owner とする論理ボリュームを自動作成してくれる
+	- 各ボリュームは既定でシンプロビジョニングされるので、ストレージ容量の効率的な利用はできるものの、ストレージボリュームがいっぱいにならないよう実データ容量のコントロールは必要
+	- 固定長ボリュームの作成が必須の場合など、既定と違う構成が必要な場合は[必要なインフラストラクチャ ボリュームのみを作成する]を選択肢、ボリュームを別途作成すること
 #### 8. Azure 上のオブジェクトを管理しやすくする任意のタグをつけ、[次へ: 検証] をクリック
 - 検証タブが開き、リソース作成ステップ 7 項目が自動実行される
 #### 9. 検証タブ
