@@ -6,8 +6,8 @@
 ![image](https://github.com/osamut/AzureStackHCI_23H2/assets/1791583/8c009dd9-d86e-4931-bcb7-a60e1534df88)
 
 > [!NOTE]
->- ネステッドのテスト環境がベースですが、各手順のスクリーンショットによる解説はこちらにあります！
->- https://github.com/osamut/AzureLocal-Nested-Deployment/blob/main/AzureLocal_%E5%B1%95%E9%96%8B%E3%81%AE%E6%B5%81%E3%82%8C_Nested%E3%82%92%E4%BE%8B%E3%81%AB.pdf
+>- あくまでもテスト用ですが、各手順のスクリーンショットによる解説はこちらにあります！
+>- https://github.com/osamut/AzureLocal_2503_Deploy/blob/main/AzureLocal_%E5%B1%95%E9%96%8B-%E7%89%A9%E7%90%86.pdf
 
 </details>
 
