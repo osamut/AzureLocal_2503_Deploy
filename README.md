@@ -101,10 +101,6 @@ Get-NetAdapter -Name "MGMT_VM2" | Set-NetIPInterface -Dhcp Disabled
 Get-NetAdapter -Name "Storage1" | Set-NetIPInterface -Dhcp Disabled
 Get-NetAdapter -Name "Storage2" | Set-NetIPInterface -Dhcp Disabled
 ```
-- IPv6 の無効化
-```
-Disable-NetAdapterBinding -Name * -ComponentID ms_tcpip6
-```
 
 - NIC ドライバーをインストール
 	- サーバーベンダーのサイトからダウンロードした最新のサポートされた NIC ドライバーをインストール
@@ -116,22 +112,7 @@ Disable-NetAdapterBinding -Name * -ComponentID ms_tcpip6
 Get-NetAdapter -Name * | Select *Driver*
 ```
 
-__※ Ethernet = Ethernet Remote NDIS Compatible Device という Inbox Driver NIC が存在する可能性あり　・・・対処が必要__
-- [Enternet Remote NDIS Compatible Device という NIC について](https://www.dell.com/support/kbdoc/ja-jp/000130077/poweredge-idrac-%E3%83%80%E3%82%A4%E3%83%AC%E3%82%AF%E3%83%88-%E6%A9%9F%E8%83%BD-%E3%81%AE-%E4%BD%BF%E7%94%A8-%E6%96%B9%E6%B3%95)
-
-- 対処１：以下のコマンドにて該当するクラスター検証時のエラーを回避
-```
-# Exclude iRDAC USB NIC from cluster validation
-New-Item -Path HKLM:\system\currentcontrolset\services\clussvc
-New-Item -Path HKLM:\system\currentcontrolset\services\clussvc\parameters
-New-ItemProperty -Path HKLM:\system\currentcontrolset\services\clussvc\parameters -Name ExcludeAdaptersByDescription  -Value "Remote NDIS Compatible Device"
-```
-- 対処２：以下のコマンドにて該当するプラグ＆プレイデバイスを削除
-	- pnputil /enum-devices /ids /class net コマンドにて Network Device の Instance ID を確認可能
-	- プラグ＆プレイデバイスのためノード再起動後に Enternet Remote NDIS Compatible Device は自動復活する
-```
-pnputil /remove-device "USB\VID_413C&PID_A102\5678"
-```
+__※ Ethernet = Ethernet Remote NDIS Compatible Device という Inbox Driver NIC が存在する可能性あり　・・・対処は不要になった__
 
 - VLAN 構成と NIC の関係を確認しておく
 	- Software Defined Storage 用の RDMA NIC には VLAN 設定が必須
