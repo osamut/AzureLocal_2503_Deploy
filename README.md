@@ -170,6 +170,15 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 		- Microsoft.ResourceConnector
 		- HybridContainerService
 		- Microsoft.Attestation
+ 
+- サブスクリプションに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
+	- Azure Stack HCI Administrator
+  	- Reader
+ - リソースグループに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
+ 	- Key Vault Data Access Administrator
+  	- Key Vault Secrets Officer　　　      (日本語ポータル作業時は ”キーコンテナーシークレット責任者” を探す)
+   	- Key Vault Contributor
+   	- Storage Account Contributor
 </details>
 
 ## 6. Azure Local 各ノードを Azure Arc で Azure と接続
@@ -202,15 +211,6 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 ## 7. Azure Local クラスター展開
 <details>
 	
-### 事前設定
-- サブスクリプションに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
-	- Azure Stack HCI Administrator
-  	- Reader
- - リソースグループに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
- 	- Key Vault Data Access Administrator
-  	- Key Vault Secrets Officer　　　      (日本語ポータル作業時は ”キーコンテナーシークレット責任者” を探す)
-   	- Key Vault Contributor
-   	- Storage Account Contributor
 ### クラスター構築作業
 -  Azure ポータルの [Azure Arc] - [Azure Local] 管理画面にて、[すべてのシステム (プレビュ―)] を選択
 	-  プレビューではない画面にしたい場合は、画面内の [以前のエクスペリエンスに切り替える] をクリックすると GA 済みの画面が表示される
