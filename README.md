@@ -154,12 +154,7 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 <details>
 	
 - Azure ポータル(https://portal.azure.com) にログオン
-- Azure Local に関連するオブジェクトを登録するリソースグループを新規作成
-	- (リソースグループに対して各オブジェクトが作成される)
-	- リソースグループに対して、Azure 側で作業をするアカウントに以下の管理権限を付与
- 		- Azure Connected Machine Onboarding
-   		- Azure Connected Machine Resource Administrator
-	- サブスクリプションに以下のリソースプロバイダーが登録されていることを確認し、登録されていなければ登録する		
+- サブスクリプションに以下のリソースプロバイダーが登録されていることを確認し、登録されていなければ登録する		
 		- Microsoft.HybridCompute
 		- Microsoft.GuestConfiguration
 		- Microsoft.HybridConnectivity
@@ -170,15 +165,18 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 		- Microsoft.ResourceConnector
 		- HybridContainerService
 		- Microsoft.Attestation
- 
 - サブスクリプションに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
 	- Azure Stack HCI Administrator
   	- Reader
- - リソースグループに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
- 	- Key Vault Data Access Administrator
-  	- Key Vault Secrets Officer　　　      (日本語ポータル作業時は ”キーコンテナーシークレット責任者” を探す)
-   	- Key Vault Contributor
-   	- Storage Account Contributor
+- Azure Local に関連するオブジェクトを登録するリソースグループを新規作成
+	- (リソースグループに対して各オブジェクトが作成される)
+- リソースグループに対して、Azure 側で作業をするアカウントに以下の管理権限を付与
+	- Azure Connected Machine Onboarding
+	- Azure Connected Machine Resource Administrator
+	- Key Vault Data Access Administrator
+	- Key Vault Secrets Officer　　　      (日本語ポータル作業時は ”キーコンテナーシークレット責任者” を探す)
+	- Key Vault Contributor
+	- Storage Account Contributor
 </details>
 
 ## 6. Azure Local 各ノードを Azure Arc で Azure と接続
