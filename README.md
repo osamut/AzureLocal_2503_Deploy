@@ -155,16 +155,16 @@ New-HciAdObjectsPreCreation -AzureStackLCMUserCredential (Get-Credential) -AsHci
 	
 - Azure ポータル(https://portal.azure.com) にログオン
 - サブスクリプションに以下のリソースプロバイダーが登録されていることを確認し、登録されていなければ登録する		
-		- Microsoft.HybridCompute
-		- Microsoft.GuestConfiguration
-		- Microsoft.HybridConnectivity
-		- Microsoft.AzureStackHCI
-		- Microsoft.Kubernetes
-		- Microsoft.KubernetesConfiguration
-		- Microsoft.ExtendedLocation
-		- Microsoft.ResourceConnector
-		- HybridContainerService
-		- Microsoft.Attestation
+	- Microsoft.HybridCompute
+	- Microsoft.GuestConfiguration
+	- Microsoft.HybridConnectivity
+	- Microsoft.AzureStackHCI
+	- Microsoft.Kubernetes
+	- Microsoft.KubernetesConfiguration
+	- Microsoft.ExtendedLocation
+	- Microsoft.ResourceConnector
+	- HybridContainerService
+	- Microsoft.Attestation
 - サブスクリプションに対し、Azure 側の作業をするアカウントに以下の管理権限を付与
 	- Azure Stack HCI Administrator
   	- Reader
