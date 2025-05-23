@@ -46,11 +46,22 @@
 ## 3. Azure Local OS インストール後の設定 ※各ノードにて実施
 <details>
 	
-### 1: OSインストール後にパスワード設定画面が出てくるので、12文字以上の複雑なパスワードを入力 ※Sconfig の画面へ遷移
+### 1: OSインストール後にパスワード設定画面が出てくるので、12文字以上の複雑なパスワードを入力 → Sconfig の画面へ自動遷移
+> [!CAUTION]
+> ### 現在 ”Azure Local” の SConfig ではNICのIPアドレス設定が反映されないことがある。その場合、PowerShell にて実施(以下にサンプルあり)
+
+### 2: [15]で一旦 Sconfig の画面を終了 → PowerShell の画面へ自動遷移
+-  現時点でリンクアップしている NIC のリストを確認
+```
+Get-NetAdapter * | Where-Object {$_.status -eq "Up"} | select name,InterfaceDescription,Status
+
+```
+- ノードのAzure Arc登録や管理用に使うNICの名前(”port1"とか”SLOT 3 Port 1"とか)を控える
+```
+Get-NetAdapter -Name “port3” | New-NetIPAddress -AddressFamily IPv4 -IPAddress 10.100.50.11 -PrefixLength 24 -DefaultGateway 10.100.50.1
+Get-NetAdapter "port3" | Set-DnsClientServerAddress -ServerAddresses 10.100.50.10
+```
 ### 2: SConfig での設定
-- 8の [Network settings] にて管理用の NIC に IP アドレスを設定
-	- DHCP から IP をもらっている複数の NIC がある場合、番号の小さい IP アドレスを管理用にするとよさそう
-	- [静的IPアドレス] [サブネットマスク] [デフォルトゲートウェイ] の設定後、[DNS サーバー] を追加設定
 - 7 の [Remote desktop] にてリモートデスクトップを Enabled に変更
 	- リモートデスクトップだとコピー＆ペーストが容易で、作業の生産性が上がるため
 	- Azure Local 展開後は自動で Disable にしてくれる
@@ -61,12 +72,12 @@
 	- Azure Local OSはデフォルトのタイムゾーンが Pacific Timeになっているので時刻のズレに気づかない可能性あり　－－JSTに変更するなどして確実に確認すること
 - 2 の [Computer name] にてコンピュータ名を変更し、再起動
 
-### 3: NIC の名前設定や DHCP 無効化などを行う
+### 3: NIC 設定や DHCP 無効化などを行う
 - リモートデスクトップ mstsc.exe にて各ノードにリモートアクセス
 	- 管理者名は コンピュータ名￥administrator 　パスワードはインストール後に設定したものを利用
 -  現時点での NIC の状態を確認
 ```
-Get-NetIPAddress -AddressFamily IPv4 | select InterfaceAlias,IPAddress,PrefixOrigin
+Get-NetAdapter * | Where-Object {$_.status -eq "Up"} | select name,InterfaceDescription,Status
 ```
 ```
 --結果例--
@@ -83,16 +94,10 @@ Loopback Pseudo-Interface 1　  127.0.0.1　　　　　 WellKnown     ・・・
 		
 - Azure Local の Network ATC (インテントベースのネットワーク管理)で利用するため、環境に合わせて NIC 名を変更
 	- 本記事では NIC 名が Port1,Port2,Port3,Port4 になっていることが前提で書いてある
- 	- 既存環境の NIC 名を使って正しく設定する必要あり
-- 最初に手動で IP アドレス設定をした管理用 NIC の名前を MGMT_VM1 に変更
+ 	- 複数ノードで物理NICとOSから見たNIC名の割り当てに違いがあれば、統一しておく (その際に利用するNIC名変更コマンドは以下)
 ```
 Rename-NetAdapter -Name "Port1" -NewName "MGMT_VM1"
 ```
- - それ以外の 3 つの NIC の名前変更
-```
-Rename-NetAdapter -Name "Port2" -NewName "MGMT_VM2"
-Rename-NetAdapter -Name "Port3" -NewName "Storage1"
-Rename-NetAdapter -Name "Port4" -NewName "Storage2"
 ```
 - NIC の DHCP を無効化
 ```
