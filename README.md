@@ -98,7 +98,7 @@ Loopback Pseudo-Interface 1　  127.0.0.1　　　　　 WellKnown     ・・・
 ```
 Rename-NetAdapter -Name "Port1" -NewName "MGMT_VM1"
 ```
-```
+
 - NIC の DHCP を無効化
 ```
 Get-NetAdapter -Name "MGMT_VM1" | Set-NetIPInterface -Dhcp Disabled
